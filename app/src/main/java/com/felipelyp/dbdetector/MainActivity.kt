@@ -19,6 +19,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
 
+        //Primeiro um teste após a criação dos arquivos python
+
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
             GlobalScope.launch(Dispatchers.IO) {
                 try {
