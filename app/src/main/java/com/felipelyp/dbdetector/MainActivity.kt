@@ -36,7 +36,10 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(this@MainActivity, result.toString(), Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Connection error", Toast.LENGTH_SHORT).show()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, "Connection error", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
         }
