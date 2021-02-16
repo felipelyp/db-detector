@@ -7,9 +7,11 @@ import telnet
 
 class Fiberhome:
     
+    def __init__(self):
+        self.clean_terminal = 'clear'
+
     def start(self, host, port, user, passw):
         self.telnet = telnet.Telnet(host, port, user, passw)
-        self.clean_terminal = 'clear'
         # Verificar se os comando é compativel
         self.telnet.send('cd gpononu')
         data = self.telnet.data()

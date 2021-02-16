@@ -9,7 +9,7 @@ class Telnet:
 
     def __init__(self, host, port, username, password):
         self.telnet = telnetlib.Telnet(host, port)
-            
+
         self.telnet.read_until(b"Login:")
         self.telnet.write(username.encode('ascii') + b"\n")
 

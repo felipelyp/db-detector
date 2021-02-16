@@ -1,10 +1,10 @@
 import fiberhome
 
-fiberhome = fiberhome.Fiberhome()
+fiber = fiberhome.Fiberhome()
 
 def start(host, ip, user, passw):
-    fiberhome.start(host, ip, user, passw)
+    return fiber.start(host, ip, user, passw)
 
 def cd_gpononu():
-    fiberhome.cd_gpononu()
-    return fiberhome.data()
+    fiber.cd_gpononu()
+    return fiber.data()
