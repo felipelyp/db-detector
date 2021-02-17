@@ -7,7 +7,7 @@ class Telnet:
     # Desenvolvido por Felipe Lyp
     #
 
-    def __init__(self, host, port, username, password):
+    def connect(self, host, port, username, password):
         self.telnet = telnetlib.Telnet(host, port)
 
         self.telnet.read_until(b"Login:")

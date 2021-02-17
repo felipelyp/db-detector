@@ -5,86 +5,85 @@ import re
 # Importação lib local
 import telnet
 
-class Fiberhome:
+tn = telnet.Telnet()
+
+""" Comandos geral """
+dir_gpononu = 'cd onu'
+dir_qinq = 'cd lan'
+check_slot = 'show online slot SLOT_NUM pon PON_NUM'
+sinal_onu = 'show optic_module slot SLOT_NUM pon PON_NUM onu ONU_NUM'
+onu_mode = 'show onu_servic slot SLOT_NUM pon PON_NUM onu ONU_NUM'
+
+def connect(host, port, user, passw):
+    global dir_gpononu, dir_qinq, check_slot
+    global sinal_onu, onu_mode
+
+    tn.connect(host, port, user, passw)
+    # Verificar se os comando é compativel
+    tn.send('cd gpononu')
+    data = tn.data()
+    # Comandos versão anterior da olt
+    if '\\gpononu#' in data:
+        """ Aplicar comandos novos """
+        dir_gpononu = 'cd gpononu'
+        dir_qinq = 'cd qinq'
+        check_slot = 'show online slot SLOT_NUM link PON_NUM'
+        sinal_onu = 'show optic_module slot SLOT_NUM link PON_NUM onu ONU_NUM'
+        onu_mode = 'show onu_servic slot SLOT_NUM link PON_NUM onu ONU_NUM'
+
+def cd_gpononu():
+    tn.send(dir_gpononu)
+    return tn.data()
+
+def cd_qinq():
+    tn.send(dir_qinq)
+
+def cd_exit():
+    tn.send('cd ..')
+
+def show_online_onu(slot, pon, controlc = False):
+    cmd = check_slot.replace('SLOT_NUM', str(slot))
+    cmd = cmd.replace('PON_NUM', str(pon))
     
-    def __init__(self):
-        self.clean_terminal = 'clear'
-
-    def start(self, host, port, user, passw):
-        self.telnet = telnet.Telnet(host, port, user, passw)
-        # Verificar se os comando é compativel
-        self.telnet.send('cd gpononu')
-        data = self.telnet.data()
-        # Comandos versão recente da olt
-        if 'can not find the dir' in data:
-            self.last = True
-            self.dir_gpononu = 'cd onu'
-            self.dir_qinq = 'cd lan'
-            self.check_slot = 'show online slot SLOT_NUM pon PON_NUM'
-            self.sinal_onu = 'show optic_module slot SLOT_NUM pon PON_NUM onu ONU_NUM'
-            self.onu_mode = 'show onu_servic slot SLOT_NUM pon PON_NUM onu ONU_NUM'
-        else: # Comandos versão antiga da olt
-            self.last = False
-            self.dir_gpononu = 'cd gpononu'
-            self.dir_qinq = 'cd qinq'
-            self.check_slot = 'show online slot SLOT_NUM link PON_NUM'
-            self.sinal_onu = 'show optic_module slot SLOT_NUM link PON_NUM onu ONU_NUM'
-            self.onu_mode = 'show onu_servic slot SLOT_NUM link PON_NUM onu ONU_NUM'
+    tn.send(cmd)
     
-    def cd_gpononu(self):
-        self.telnet.send(self.dir_gpononu)
+    stop = True
+    data_pon = ''
 
-    def cd_qinq(self):
-        self.telnet.send(self.dir_qinq)
+    while stop:
+        data = tn.data()
+        data_pon += data
+        if controlc:
+            tn.send('\x03')
+            break
 
-    def cd_exit(self):
-        self.telnet.send('cd ..')
-
-    def show_online_onus(self, slot, pon, controlc = False):
-        cmd = self.check_slot.replace('SLOT_NUM', str(slot))
-        cmd = cmd.replace('PON_NUM', str(pon))
-        
-        self.telnet.send(cmd)
-        
-        stop = True
-        data_pon = ''
-
-        while stop:
-            data = self.telnet.data()
-            data_pon += data
-            if controlc:
-                self.telnet.send('\x03')
-                break
-
-            if 'stop' in data:
-                self.telnet.send(' ', False)
-            else:
-                stop = False
-        
-        # Limpar tudo
-        self.clean_terminal = 'clear'
-
-        return data_pon
-        
-    def show_optic_module(self, slot, pon, onu):
-        cmd = self.sinal_onu.replace('SLOT_NUM', str(slot))
-        cmd = cmd.replace('PON_NUM', str(pon))
-        cmd = cmd.replace('ONU_NUM', str(onu))
-
-        self.telnet.send(cmd)
-        
-        data = self.telnet.data()
-
-        return data.replace(' ', '').rstrip()
-
-    def show_onu_mode(self, slot, pon, onu):
-        cmd = self.onu_mode.replace('SLOT_NUM', str(slot))
-        cmd = cmd.replace('PON_NUM', str(pon))
-        cmd = cmd.replace('ONU_NUM', str(onu))
-
-        self.telnet.send(cmd)
-
-        return self.telnet.data()
+        if 'stop' in data:
+            tn.send(' ', False)
+        else:
+            stop = False
     
-    def data(self):
-        return self.telnet.data()
+    # Limpar tudo
+    tn.send('clear')
+
+    return data_pon
+        
+def show_optic_module(slot, pon, onu):
+    cmd = sinal_onu.replace('SLOT_NUM', str(slot))
+    cmd = cmd.replace('PON_NUM', str(pon))
+    cmd = cmd.replace('ONU_NUM', str(onu))
+
+    tn.send(cmd)
+        
+    return tn.data()
+
+def show_onu_mode(slot, pon, onu):
+    cmd = onu_mode.replace('SLOT_NUM', str(slot))
+    cmd = cmd.replace('PON_NUM', str(pon))
+    cmd = cmd.replace('ONU_NUM', str(onu))
+
+    tn.send(cmd)
+
+    return tn.data()
+    
+def data():
+    return tn.data()
